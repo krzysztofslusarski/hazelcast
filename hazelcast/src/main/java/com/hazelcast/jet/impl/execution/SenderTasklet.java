@@ -138,7 +138,9 @@ public class SenderTasklet implements Tasklet {
     private boolean tryFillOutputBuffer() {
         try {
             // header size + slot for writtenCount
-            outputBuffer.position(bufPosPastHeader + Bits.INT_SIZE_IN_BYTES);
+            int position = bufPosPastHeader + Bits.INT_SIZE_IN_BYTES;
+            outputBuffer.growToFirstGrowthSizeIfPositionUnavailable(position);
+            outputBuffer.position(position);
             int writtenCount = 0;
             for (Object item;
                  outputBuffer.position() < packetSizeLimit

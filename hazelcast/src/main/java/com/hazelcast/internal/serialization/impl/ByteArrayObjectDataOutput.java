@@ -430,11 +430,23 @@ public class ByteArrayObjectDataOutput extends VersionedObjectDataOutput impleme
 
     @Override
     public void position(int newPos) {
-        if ((newPos > buffer.length) || (newPos < 0)) {
+        if ((newPos >= buffer.length) || (newPos < 0)) {
             throw new IllegalArgumentException();
         }
 
         pos = newPos;
+    }
+
+    @Override
+    public void growToFirstGrowthSizeIfPositionUnavailable(int position) {
+        if (firstGrowthSize == -1) {
+            throw new IllegalArgumentException();
+        }
+        if (position >= buffer.length && buffer.length < firstGrowthSize) {
+            byte[] newBuffer = new byte[firstGrowthSize];
+            System.arraycopy(buffer, 0, newBuffer, 0, pos);
+            buffer = newBuffer;
+        }
     }
 
     public int available() {

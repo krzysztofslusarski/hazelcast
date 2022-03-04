@@ -72,5 +72,7 @@ public interface BufferObjectDataOutput extends ObjectDataOutput, Closeable,
 
     void position(int newPos);
 
+    void growToFirstGrowthSizeIfPositionUnavailable(int position);
+
     void clear();
 }
