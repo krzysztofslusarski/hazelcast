@@ -25,6 +25,7 @@ import com.hazelcast.jet.sql.impl.connector.map.RowProjectorProcessorSupplier;
 import com.hazelcast.jet.sql.impl.expression.json.JsonArrayFunction;
 import com.hazelcast.jet.sql.impl.expression.json.JsonObjectFunction;
 import com.hazelcast.jet.sql.impl.expression.json.JsonParseFunction;
+import com.hazelcast.jet.sql.impl.expression.json.JsonPathUtil;
 import com.hazelcast.jet.sql.impl.expression.json.JsonQueryFunction;
 import com.hazelcast.jet.sql.impl.expression.json.JsonValueFunction;
 import com.hazelcast.jet.sql.impl.opt.FieldCollation;
@@ -65,8 +66,9 @@ public class JetSqlSerializerHook implements DataSerializerHook {
     public static final int AGGREGATE_SUM_SUPPLIER = 18;
     public static final int AGGREGATE_AVG_SUPPLIER = 19;
     public static final int AGGREGATE_COUNT_SUPPLIER = 20;
+    public static final int CONCURRENT_INITIAL_SET_CACHE = 21;
 
-    public static final int LEN = AGGREGATE_COUNT_SUPPLIER + 1;
+    public static final int LEN = CONCURRENT_INITIAL_SET_CACHE + 1;
 
     @Override
     public int getFactoryId() {
@@ -102,6 +104,7 @@ public class JetSqlSerializerHook implements DataSerializerHook {
         constructors[AGGREGATE_SUM_SUPPLIER] = arg -> new AggregateAbstractPhysicalRule.AggregateSumSupplier();
         constructors[AGGREGATE_AVG_SUPPLIER] = arg -> new AggregateAbstractPhysicalRule.AggregateAvgSupplier();
         constructors[AGGREGATE_COUNT_SUPPLIER] = arg -> new AggregateAbstractPhysicalRule.AggregateCountSupplier();
+        constructors[CONCURRENT_INITIAL_SET_CACHE] = arg -> new JsonPathUtil.ConcurrentInitialSetCache<>();
 
         return new ArrayDataSerializableFactory(constructors);
     }
