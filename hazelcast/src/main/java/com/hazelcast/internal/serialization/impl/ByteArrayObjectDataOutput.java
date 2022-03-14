@@ -47,7 +47,7 @@ public class ByteArrayObjectDataOutput extends VersionedObjectDataOutput impleme
 
     private final boolean isBigEndian;
 
-    ByteArrayObjectDataOutput(int size, InternalSerializationService service, ByteOrder byteOrder) {
+    public ByteArrayObjectDataOutput(int size, InternalSerializationService service, ByteOrder byteOrder) {
         this.initialSize = size;
         this.buffer = new byte[size];
         this.service = service;
