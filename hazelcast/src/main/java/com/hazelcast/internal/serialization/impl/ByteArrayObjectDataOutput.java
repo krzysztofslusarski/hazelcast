@@ -49,9 +49,17 @@ public class ByteArrayObjectDataOutput extends VersionedObjectDataOutput impleme
 
     public ByteArrayObjectDataOutput(int size, InternalSerializationService service, ByteOrder byteOrder) {
         this.initialSize = size;
-        this.buffer = new byte[size];
+        if(size >=0){
+            this.buffer = new byte[size];
+        }
+
         this.service = service;
         isBigEndian = byteOrder == ByteOrder.BIG_ENDIAN;
+    }
+
+    public void init(byte[] buffer, int pos){
+        this.buffer = buffer;
+        this.pos = pos;
     }
 
     @Override
