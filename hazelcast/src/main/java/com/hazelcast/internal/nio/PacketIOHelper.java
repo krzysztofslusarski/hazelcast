@@ -43,7 +43,7 @@ public class PacketIOHelper {
     private boolean headerComplete;
     private char flags;
     private int partitionId;
-    private byte[] payload;
+    private Payload payload;
 
     /**
      * Writes the packet data to the supplied {@code ByteBuffer}, up to the buffer's limit. If it returns {@code false},
@@ -147,7 +147,7 @@ public class PacketIOHelper {
 
     private boolean readValue(ByteBuffer src) {
         if (payload == null) {
-            payload = new byte[size];
+            payload = PayloadFactory.getPayload(size);
         }
 
         if (size > 0) {
@@ -166,7 +166,7 @@ public class PacketIOHelper {
             }
 
             // read the data from the byte-buffer into the bytes-array.
-            src.get(payload, valueOffset, bytesRead);
+            src.get(payload.getPayload(), valueOffset, bytesRead);
             valueOffset += bytesRead;
 
             if (!done) {

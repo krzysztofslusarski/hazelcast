@@ -17,8 +17,8 @@
 package com.hazelcast.internal.nio;
 
 import com.hazelcast.internal.networking.OutboundFrame;
-import com.hazelcast.internal.server.ServerConnection;
 import com.hazelcast.internal.serialization.impl.HeapData;
+import com.hazelcast.internal.server.ServerConnection;
 
 import static com.hazelcast.internal.nio.PacketIOHelper.HEADER_SIZE;
 
@@ -109,6 +109,7 @@ public final class Packet extends HeapData implements OutboundFrame {
 
     private int partitionId;
     private transient ServerConnection conn;
+    private Payload payload;
 
     public Packet() {
         raiseFlags(FLAG_4_0);
@@ -119,7 +120,12 @@ public final class Packet extends HeapData implements OutboundFrame {
     }
 
     public Packet(byte[] payload, int partitionId) {
-        super(payload);
+        this(new NotReusablePayload(payload), partitionId);
+    }
+
+    public Packet(Payload payload, int partitionId) {
+        super(payload.getPayload());
+        this.payload = payload;
         this.partitionId = partitionId;
         raiseFlags(FLAG_4_0);
     }
@@ -214,6 +220,10 @@ public final class Packet extends HeapData implements OutboundFrame {
      */
     public int getPartitionId() {
         return partitionId;
+    }
+
+    public Payload getPayload() {
+        return payload;
     }
 
     @Override

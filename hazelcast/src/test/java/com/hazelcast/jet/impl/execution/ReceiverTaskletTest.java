@@ -18,6 +18,8 @@ package com.hazelcast.jet.impl.execution;
 
 import com.hazelcast.cluster.Address;
 import com.hazelcast.internal.nio.BufferObjectDataOutput;
+import com.hazelcast.internal.nio.NotReusablePayload;
+import com.hazelcast.internal.nio.Payload;
 import com.hazelcast.internal.serialization.InternalSerializationService;
 import com.hazelcast.internal.serialization.impl.DefaultSerializationServiceBuilder;
 import com.hazelcast.logging.LoggingService;
@@ -44,7 +46,7 @@ public class ReceiverTaskletTest {
     private ReceiverTasklet t;
     private MockOutboundCollector collector;
     private InternalSerializationService serService;
-    private final Queue<byte[]> queue = new ArrayDeque<>();
+    private final Queue<Payload> queue = new ArrayDeque<>();
 
     @Before
     public void before() {
@@ -74,6 +76,6 @@ public class ReceiverTaskletTest {
             out.writeObject(obj);
             out.writeInt(Math.abs(obj.hashCode())); // partition id
         }
-        queue.add(out.toByteArray());
+        queue.add(new NotReusablePayload(out.toByteArray()));
     }
 }

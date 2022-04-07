@@ -23,6 +23,8 @@ import com.hazelcast.internal.metrics.Probe;
 import com.hazelcast.internal.metrics.ProbeUnit;
 import com.hazelcast.internal.nio.BufferObjectDataInput;
 import com.hazelcast.internal.nio.Connection;
+import com.hazelcast.internal.nio.Payload;
+import com.hazelcast.internal.nio.PayloadFactory;
 import com.hazelcast.internal.serialization.InternalSerializationService;
 import com.hazelcast.internal.util.counters.Counter;
 import com.hazelcast.internal.util.counters.SwCounter;
@@ -92,7 +94,7 @@ public class ReceiverTasklet implements Tasklet {
     private final String destinationVertexName;
     private final Connection memberConnection;
 
-    private Queue<byte[]> incoming;
+    private Queue<Payload> incoming;
     private final ProgressTracker tracker = new ProgressTracker();
     private final ArrayDeque<ObjWithPtionIdAndSize> inbox = new ArrayDeque<>();
     private final OutboundCollector collector;
@@ -300,8 +302,9 @@ public class ReceiverTasklet implements Tasklet {
         try {
             long totalBytes = 0;
             long totalItems = 0;
-            for (byte[] payload; (payload = incoming.poll()) != null; ) {
-                BufferObjectDataInput input = serializationService.createObjectDataInput(payload, PACKET_HEADER_SIZE);
+            for (Payload payload; (payload = incoming.poll()) != null; ) {
+                BufferObjectDataInput input = serializationService.createObjectDataInput(payload.getPayload(),
+                        PACKET_HEADER_SIZE);
                 final int itemCount = input.readInt();
                 for (int i = 0; i < itemCount; i++) {
                     final int mark = input.position();
@@ -313,6 +316,7 @@ public class ReceiverTasklet implements Tasklet {
                 totalItems += itemCount;
                 totalBytes += input.position();
                 tracker.madeProgress();
+                PayloadFactory.reclaim(payload);
             }
             bytesInCounter.inc(totalBytes);
             itemsInCounter.inc(totalItems);
@@ -321,7 +325,7 @@ public class ReceiverTasklet implements Tasklet {
         }
     }
 
-    public void initIncomingQueue(Queue<byte[]> incomingQueue) {
+    public void initIncomingQueue(Queue<Payload> incomingQueue) {
         incoming = incomingQueue;
     }
 

@@ -92,7 +92,7 @@ public class Networking {
 
         ExecutionContext executionContext = jobExecutionService.getOrCreateExecutionContext(executionId);
         if (executionContext != null) {
-            executionContext.handlePacket(vertexId, ordinal, packet.getConn().getRemoteAddress(), payload);
+            executionContext.handlePacket(vertexId, ordinal, packet.getConn().getRemoteAddress(), packet.getPayload());
         }
     }
 
