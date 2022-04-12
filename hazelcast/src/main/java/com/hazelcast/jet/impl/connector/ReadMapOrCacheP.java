@@ -547,17 +547,7 @@ public final class ReadMapOrCacheP<F extends CompletableFuture, B, R> extends Ab
             try {
                 boolean isOwned = mapServiceContext.getOrInitCachedMemberPartitions().contains(partitionId);
 
-                if (isOwned) {
-                    int migrationStamp = mapServiceContext.getService().getMigrationStamp();
 
-                    MapEntriesWithCursor result = readFromRecordStore(partitionId, pointers);
-
-                    if (validateMigrationStamp(migrationStamp)) {
-                        f.complete(result);
-                    } else {
-                        scheduleForLater(f, partitionId, pointers);
-                    }
-                } else {
                     CompletableFuture<MapEntriesWithCursor> f1 = readWithOperationService(partitionId, pointers);
                     f1.whenComplete((r, t) -> {
                         if (t != null) {
@@ -566,7 +556,6 @@ public final class ReadMapOrCacheP<F extends CompletableFuture, B, R> extends Ab
                             f.complete(r);
                         }
                     });
-                }
             } catch (Throwable t) {
                 f.completeExceptionally(t);
             }
