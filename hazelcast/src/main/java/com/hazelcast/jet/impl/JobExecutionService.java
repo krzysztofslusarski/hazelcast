@@ -268,7 +268,7 @@ public class JobExecutionService implements DynamicMetricsProvider {
             Set<MemberInfo> participants,
             ExecutionPlan plan
     ) {
-        String prevCorrelationId = TracingUtils.context().getCorrelationId();
+        Long prevCorrelationId = TracingUtils.context().getCorrelationId();
         TracingUtils.context().setCorrelationId(plan.getJobConfig().getArgument(KEY_ECID));
 
         try {

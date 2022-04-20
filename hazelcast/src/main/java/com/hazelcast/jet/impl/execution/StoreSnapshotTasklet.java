@@ -189,7 +189,7 @@ public class StoreSnapshotTasklet implements Tasklet {
     }
 
     @Override
-    public String getEcid() {
+    public Long getEcid() {
         return null;
     }
 }

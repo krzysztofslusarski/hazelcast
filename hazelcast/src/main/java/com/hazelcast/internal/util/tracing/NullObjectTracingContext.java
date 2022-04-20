@@ -16,9 +16,15 @@
 
 package com.hazelcast.internal.util.tracing;
 
+import java.io.IOException;
+
 class NullObjectTracingContext extends TracingContext {
     @Override
-    public void setCorrelationId(String correlationId) {
+    public void setCorrelationId(Long correlationId) {
+    }
+
+    @Override
+    public void generateAndSetCorrelationId() {
     }
 
     @Override
@@ -26,11 +32,11 @@ class NullObjectTracingContext extends TracingContext {
     }
 
     @Override
-    public String getCorrelationId() {
+    public Long getCorrelationId() {
         return null;
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
     }
 }

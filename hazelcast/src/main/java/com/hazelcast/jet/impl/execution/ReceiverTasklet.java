@@ -119,7 +119,7 @@ public class ReceiverTasklet implements Tasklet {
     private int prevAckedSeqCompressed;
     private long prevTimestamp;
 
-    private String ecid;
+    private Long ecid;
 
     //                 END FLOW-CONTROL STATE
 
@@ -127,7 +127,7 @@ public class ReceiverTasklet implements Tasklet {
             OutboundCollector collector, InternalSerializationService serializationService,
             int rwinMultiplier, int flowControlPeriodMs, LoggingService loggingService,
             Address sourceAddress, int ordinal, String destinationVertexName,
-            Connection memberConnection, String jobPrefix, String ecid
+            Connection memberConnection, String jobPrefix, Long ecid
     ) {
         this.collector = collector;
         this.serializationService = serializationService;
@@ -347,7 +347,7 @@ public class ReceiverTasklet implements Tasklet {
     }
 
     @Override
-    public String getEcid() {
+    public Long getEcid() {
         return ecid;
     }
 }

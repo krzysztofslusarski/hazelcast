@@ -683,7 +683,7 @@ public class ProcessorTasklet implements Tasklet {
     }
 
     @Override
-    public String getEcid() {
+    public Long getEcid() {
         return context.jobConfig().getArgument(JobConfigArguments.KEY_ECID);
     }
 }

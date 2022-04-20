@@ -341,7 +341,7 @@ public class PlanExecutor {
                 .setArgument(KEY_SQL_UNBOUNDED, plan.isStreaming())
                 .setTimeoutMillis(timeout);
 
-        String correlationId = TracingUtils.context().getCorrelationId();
+        Long correlationId = TracingUtils.context().getCorrelationId();
         if (correlationId != null) {
             jobConfig.setArgument(KEY_ECID, correlationId);
         }

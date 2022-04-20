@@ -47,7 +47,6 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import static com.hazelcast.sql.SqlExpectedResultType.ANY;
@@ -169,7 +168,7 @@ public class SqlServiceImpl implements SqlService {
             QueryId queryId,
             boolean skipStats
     ) {
-        TracingUtils.context().setCorrelationId(UUID.randomUUID().toString());
+        TracingUtils.context().generateAndSetCorrelationId();
         Preconditions.checkNotNull(statement, "Query cannot be null");
 
         if (!skipStats) {

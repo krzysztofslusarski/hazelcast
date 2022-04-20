@@ -7,13 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 public class AsyncProfilerTracingContext extends TracingContext {
     private static final String FILE_LIBASYNC_PROFILER_SO = "/tmp/libasyncProfiler.so";
     private static final String CP_LIBASYNC_PROFILER_SO = "/libasyncProfiler.so";
     private static final String EVENT = "wall";
     private final AsyncProfiler asyncProfiler;
-    private final ThreadLocal<String> ecid = new ThreadLocal<>();
+    private final ThreadLocal<Long> ecid = new ThreadLocal<>();
 
     public AsyncProfilerTracingContext() throws IOException {
         try (InputStream inputStream = this.getClass().getResourceAsStream(CP_LIBASYNC_PROFILER_SO);
@@ -27,24 +28,31 @@ public class AsyncProfilerTracingContext extends TracingContext {
     }
 
     @Override
-    public void setCorrelationId(String correlationId) {
-        if (correlationId == null) {
-            asyncProfiler.clearEcid();
+    public void setCorrelationId(Long correlationId) {
+        if (correlationId == null || correlationId == 0) {
+            asyncProfiler.clearContextId();
             ecid.remove();
         } else {
-            asyncProfiler.setEcid(correlationId);
+            asyncProfiler.setContextId(correlationId);
             ecid.set(correlationId);
         }
     }
 
     @Override
+    public void generateAndSetCorrelationId() {
+        UUID uuid = UUID.randomUUID();
+        long ecid = uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits();
+        setCorrelationId(ecid);
+    }
+
+    @Override
     public void clearCorrelationId() {
-        asyncProfiler.clearEcid();
+        asyncProfiler.clearContextId();
         ecid.remove();
     }
 
     @Override
-    public String getCorrelationId() {
+    public Long getCorrelationId() {
         return ecid.get();
     }
 

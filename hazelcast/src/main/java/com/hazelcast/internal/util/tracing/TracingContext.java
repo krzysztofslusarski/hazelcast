@@ -27,7 +27,8 @@ import java.io.Closeable;
  * make absolutely no overhead for the following methods.
  */
 public abstract class TracingContext implements Closeable {
-    public abstract void setCorrelationId(String correlationId);
+    public abstract void setCorrelationId(Long correlationId);
+    public abstract void generateAndSetCorrelationId();
     public abstract void clearCorrelationId();
-    public abstract String getCorrelationId();
+    public abstract Long getCorrelationId();
 }

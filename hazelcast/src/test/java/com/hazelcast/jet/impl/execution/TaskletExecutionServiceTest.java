@@ -493,7 +493,7 @@ public class TaskletExecutionServiceTest extends JetTestSupport {
         }
 
         @Override
-        public String getEcid() {
+        public Long getEcid() {
             return null;
         }
     }
@@ -515,7 +515,7 @@ public class TaskletExecutionServiceTest extends JetTestSupport {
         }
 
         @Override
-        public String getEcid() {
+        public Long getEcid() {
             return null;
         }
     }

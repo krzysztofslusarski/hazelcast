@@ -82,7 +82,7 @@ public class SenderTasklet implements Tasklet {
     // Written by HZ networking thread, read by Jet thread
     private volatile int sendSeqLimitCompressed;
     private final Predicate<Object> addToInboxFunction = inbox::add;
-    private String ecid;
+    private Long ecid;
 
     public SenderTasklet(
             InboundEdgeStream inboundEdgeStream,
@@ -92,7 +92,7 @@ public class SenderTasklet implements Tasklet {
             int destinationVertexId, int packetSizeLimit, long executionId,
             String sourceVertexName, int sourceOrdinal,
             InternalSerializationService serializationService,
-            String ecid
+            Long ecid
     ) {
         this.inboundEdgeStream = inboundEdgeStream;
         this.destinationAddressString = destinationAddress.toString();
@@ -209,7 +209,7 @@ public class SenderTasklet implements Tasklet {
     }
 
     @Override
-    public String getEcid() {
+    public Long getEcid() {
         return ecid;
     }
 }
