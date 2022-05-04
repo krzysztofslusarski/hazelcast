@@ -368,9 +368,6 @@ public class TaskletExecutionService {
                 // garbage-free iteration -- relies on implementation in COWArrayList that doesn't use an Iterator
                 trackers.forEach(runTasklet);
                 iterationCount.inc();
-                if (!progressTracker.isMadeProgress() && newTaskletSemaphore.drainPermits() > 0) {
-                    progressTracker.madeProgress();
-                }
                 if (progressTracker.isMadeProgress()) {
                     idleCount = 0;
                 } else {
