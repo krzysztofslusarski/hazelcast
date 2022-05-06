@@ -17,14 +17,16 @@ public class AsyncProfilerTracingContext extends TracingContext {
     private final ThreadLocal<Long> ecid = new ThreadLocal<>();
 
     public AsyncProfilerTracingContext() throws IOException {
+        UUID uuid = UUID.randomUUID();
+        String filePath = FILE_LIBASYNC_PROFILER_SO + uuid;
         try (InputStream inputStream = this.getClass().getResourceAsStream(CP_LIBASYNC_PROFILER_SO);
-             OutputStream outputStream = new FileOutputStream(FILE_LIBASYNC_PROFILER_SO)
+             OutputStream outputStream = new FileOutputStream(filePath)
         ) {
             IOUtil.copyStream(inputStream, outputStream);
         }
-        asyncProfiler = AsyncProfiler.getInstance(FILE_LIBASYNC_PROFILER_SO);
-        asyncProfiler.execute("start,jfr,event=" + EVENT + ",file=prof.jfr");
-//        asyncProfiler.execute("start,jfr,event=" + EVENT + ",file=prof.jfr,interval=1000000");
+        asyncProfiler = AsyncProfiler.getInstance(filePath);
+//        asyncProfiler.execute("start,jfr,event=" + EVENT + ",file=prof" + uuid + ".jfr" );
+        asyncProfiler.execute("start,jfr,event=" + EVENT + ",file=prof" + uuid + ".jfr,interval=100000");
     }
 
     @Override
