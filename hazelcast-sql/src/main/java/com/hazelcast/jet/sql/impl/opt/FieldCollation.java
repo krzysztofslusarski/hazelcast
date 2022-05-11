@@ -59,15 +59,17 @@ public class FieldCollation implements Serializable, IdentifiedDataSerializable 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeInt(index);
-        out.writeObject(direction);
-        out.writeObject(nullDirection);
+        out.writeString(direction == null ? null : direction.name());
+        out.writeString(nullDirection == null ? null : nullDirection.name());
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
         index = in.readInt();
-        direction = in.readObject();
-        nullDirection = in.readObject();
+        String directionStr = in.readString();
+        direction = directionStr == null ? null : Direction.valueOf(directionStr);
+        String nullDirectionStr = in.readString();
+        nullDirection = nullDirectionStr == null ? null : NullDirection.valueOf(nullDirectionStr);
     }
 
     @Override

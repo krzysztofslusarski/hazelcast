@@ -261,7 +261,7 @@ public class ExecutionPlan implements IdentifiedDataSerializable {
                 ProcessorTasklet processorTasklet = new ProcessorTasklet(context,
                         nodeEngine.getExecutionService().getExecutor(TASKLET_INIT_CLOSE_EXECUTOR_NAME),
                         jobSerializationService, processor, inboundStreams, outboundStreams, snapshotContext,
-                        snapshotCollector, isSource);
+                        snapshotCollector, isSource, isLightJob);
                 tasklets.add(processorTasklet);
                 this.processors.add(processor);
                 localProcessorIdx++;

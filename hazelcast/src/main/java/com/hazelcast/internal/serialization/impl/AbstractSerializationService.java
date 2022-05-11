@@ -571,9 +571,15 @@ public abstract class AbstractSerializationService implements InternalSerializat
         }
         final Class type = object.getClass();
 
+        //1,5-Thread local cache
+        SerializerAdapter serializer = ThreadLocalSerializationCache.get(type, includeSchema);
+        if (serializer != null) {
+            return serializer;
+        }
+
         //2-Default serializers, Dataserializable, Compact, Portable, primitives, arrays, String and
         // some helper Java types(BigInteger etc)
-        SerializerAdapter serializer = lookupDefaultSerializer(type, includeSchema);
+        serializer = lookupDefaultSerializer(type, includeSchema);
 
         //3-Custom registered types by user
         if (serializer == null || allowOverrideDefaultSerializers) {
@@ -601,6 +607,8 @@ public abstract class AbstractSerializationService implements InternalSerializat
         if (serializer == null) {
             throw new HazelcastSerializationException("There is no suitable serializer for " + type);
         }
+
+        ThreadLocalSerializationCache.set(type, includeSchema, serializer);
 
         return serializer;
     }

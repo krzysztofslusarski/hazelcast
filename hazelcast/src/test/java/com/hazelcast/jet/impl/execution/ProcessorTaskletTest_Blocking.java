@@ -299,7 +299,7 @@ public class ProcessorTaskletTest_Blocking {
         }
         final ProcessorTasklet t = new ProcessorTasklet(context, DIRECT_EXECUTOR,
                 new DefaultSerializationServiceBuilder().build(), processor, instreams, outstreams,
-                mock(SnapshotContext.class), new MockOutboundCollector(10), false);
+                mock(SnapshotContext.class), new MockOutboundCollector(10), false, false);
         t.init();
         return t;
     }

@@ -19,11 +19,13 @@ package com.hazelcast.jet.impl.execution;
 import com.hazelcast.internal.metrics.DynamicMetricsProvider;
 import com.hazelcast.internal.metrics.MetricDescriptor;
 import com.hazelcast.internal.metrics.MetricsCollectionContext;
+import com.hazelcast.internal.serialization.impl.SerializerAdapter;
 import com.hazelcast.jet.core.Processor;
 import com.hazelcast.jet.impl.util.ProgressState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Map;
 
 public interface Tasklet extends DynamicMetricsProvider {
 
@@ -48,4 +50,7 @@ public interface Tasklet extends DynamicMetricsProvider {
     default void provideDynamicMetrics(MetricDescriptor tagger, MetricsCollectionContext context) {
     }
 
+    default Map<Class, SerializerAdapter[]> getSerializationCache() {
+        return null;
+    }
 }

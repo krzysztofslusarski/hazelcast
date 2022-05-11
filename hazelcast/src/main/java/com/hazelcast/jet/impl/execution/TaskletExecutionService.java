@@ -19,6 +19,7 @@ package com.hazelcast.jet.impl.execution;
 import com.hazelcast.internal.metrics.MetricDescriptor;
 import com.hazelcast.internal.metrics.MetricsRegistry;
 import com.hazelcast.internal.metrics.Probe;
+import com.hazelcast.internal.serialization.impl.ThreadLocalSerializationCache;
 import com.hazelcast.internal.util.RuntimeAvailableProcessors;
 import com.hazelcast.internal.util.concurrent.BackoffIdleStrategy;
 import com.hazelcast.internal.util.concurrent.IdleStrategy;
@@ -401,6 +402,7 @@ public class TaskletExecutionService {
             try {
                 myThread.setContextClassLoader(t.jobClassLoader);
                 contextContainer.setContext(t.tasklet.getProcessorContext());
+                ThreadLocalSerializationCache.setCache(t.tasklet.getSerializationCache());
                 final ProgressState result = t.tasklet.call();
                 if (result.isDone()) {
                     dismissTasklet(t);
@@ -410,6 +412,7 @@ public class TaskletExecutionService {
                 handleTaskletExecutionError(t, e);
             } finally {
                 contextContainer.setContext(null);
+                ThreadLocalSerializationCache.clearCache();
             }
             if (t.executionTracker.executionCompletedExceptionally()) {
                 dismissTasklet(t);

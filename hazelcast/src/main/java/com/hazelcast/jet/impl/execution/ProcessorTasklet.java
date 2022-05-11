@@ -24,6 +24,7 @@ import com.hazelcast.internal.metrics.Probe;
 import com.hazelcast.internal.metrics.ProbeLevel;
 import com.hazelcast.internal.metrics.ProbeUnit;
 import com.hazelcast.internal.serialization.SerializationService;
+import com.hazelcast.internal.serialization.impl.SerializerAdapter;
 import com.hazelcast.internal.util.MutableInteger;
 import com.hazelcast.internal.util.Preconditions;
 import com.hazelcast.internal.util.collection.FixedCapacityArrayList;
@@ -51,6 +52,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,6 +153,8 @@ public class ProcessorTasklet implements Tasklet {
     private final Predicate<Object> addToInboxFunction = inbox.queue()::add;
     private Future<?> closeFuture;
 
+    private final Map<Class, SerializerAdapter[]> serializationCache;
+
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
     public ProcessorTasklet(
             @Nonnull Context context,
@@ -161,8 +165,8 @@ public class ProcessorTasklet implements Tasklet {
             @Nonnull List<? extends OutboundEdgeStream> outstreams,
             @Nonnull SnapshotContext ssContext,
             @Nullable OutboundCollector ssCollector,
-            boolean isSource
-    ) {
+            boolean isSource,
+            boolean useSerializationCache) {
         Preconditions.checkNotNull(processor, "processor");
         this.context = context;
         this.executionService = executionService;
@@ -191,6 +195,11 @@ public class ProcessorTasklet implements Tasklet {
         waitForAllBarriers = ssContext.processingGuarantee() == ProcessingGuarantee.EXACTLY_ONCE;
 
         watermarkCoalescer = WatermarkCoalescer.create(instreams.size());
+        if (useSerializationCache) {
+            serializationCache = new HashMap<>();
+        } else {
+            serializationCache = null;
+        }
     }
 
     private Queue<InboundEdgeStream[]> createInstreamGroupQueue(List<? extends InboundEdgeStream> instreams) {
@@ -705,5 +714,10 @@ public class ProcessorTasklet implements Tasklet {
         if (context instanceof ProcCtx) {
             ((ProcCtx) context).metricsContext().provideDynamicMetrics(descriptor, mContext);
         }
+    }
+
+    @Override
+    public Map<Class, SerializerAdapter[]> getSerializationCache() {
+        return serializationCache;
     }
 }
