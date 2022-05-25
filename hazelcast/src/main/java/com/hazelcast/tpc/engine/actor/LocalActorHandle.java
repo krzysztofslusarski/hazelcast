@@ -1,7 +1,6 @@
 package com.hazelcast.tpc.engine.actor;
 
 public class LocalActorHandle implements ActorHandle {
-
     private final Actor actor;
 
     public LocalActorHandle(Actor actor) {
@@ -9,7 +8,7 @@ public class LocalActorHandle implements ActorHandle {
     }
 
     @Override
-    public void send(Object message){
-        this.actor.send(message);
+    public void send(Object message) {
+        this.actor.send(message, null);
     }
 }

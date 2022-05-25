@@ -2,18 +2,13 @@ package com.hazelcast.tpc.engine.actor;
 
 import com.hazelcast.tpc.engine.Eventloop;
 import com.hazelcast.tpc.engine.EventloopTask;
-import org.jctools.queues.MpscArrayQueue;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Actor implements EventloopTask {
-
     public final static int DEFAULT_MAILBOX_CAPACITY = 512;
 
-    private final MpscArrayQueue mailbox;
+    protected final Mailbox mailbox;
+    protected Eventloop eventloop;
 
-    private final AtomicBoolean scheduled = new AtomicBoolean();
-    private Eventloop eventloop;
     private final LocalActorHandle handle = new LocalActorHandle(this);
 
     public LocalActorHandle getHandle() {
@@ -28,26 +23,21 @@ public abstract class Actor implements EventloopTask {
         this.eventloop = eventloop;
     }
 
-    public Actor() {
-        this(DEFAULT_MAILBOX_CAPACITY);
+    public Actor(Mailbox mailbox) {
+        this.mailbox = mailbox;
     }
 
-    public Actor(int mailboxCapacity) {
-        this.mailbox = new MpscArrayQueue(mailboxCapacity);
-    }
+    protected abstract void newMessage();
 
-    void send(Object msg) {
+    void send(Object msg, Mailbox returnMailbox) {
         //todo: we need to deal with overload.
-        mailbox.offer(msg);
-
-        if (!scheduled.get() && scheduled.compareAndSet(false, true)) {
-            eventloop.execute(this);
-        }
+        mailbox.offer(new Message(msg, returnMailbox));
+        newMessage();
     }
 
     @Override
     public void run() throws Exception {
-        Object msg = mailbox.poll();
+        Message msg = mailbox.poll();
         if (msg != null) {
             try {
                 process(msg);
@@ -59,21 +49,15 @@ public abstract class Actor implements EventloopTask {
         unschedule();
     }
 
-    private void unschedule() {
-        if (mailbox.isEmpty()) {
-            scheduled.set(false);
+    protected abstract void unschedule();
 
-            if (mailbox.isEmpty()) {
-                return;
-            }
-
-            if (scheduled.compareAndSet(false, true)) {
-                eventloop.execute(this);
-            }
-        } else {
-            eventloop.execute(this);
-        }
+    public boolean sameEventLoop(Actor anotherActor) {
+        return eventloop != null && eventloop == anotherActor.eventloop;
     }
 
-    public abstract void process(Object msg);
+    public Mailbox getMailbox() {
+        return mailbox;
+    }
+
+    public abstract void process(Message msg);
 }
