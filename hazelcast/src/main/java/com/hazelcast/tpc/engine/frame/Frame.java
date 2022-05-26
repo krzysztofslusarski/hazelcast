@@ -3,6 +3,7 @@ package com.hazelcast.tpc.engine.frame;
 import com.hazelcast.tpc.engine.AsyncSocket;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,7 +12,6 @@ import static com.hazelcast.internal.nio.Bits.BYTES_INT;
 import static com.hazelcast.internal.nio.Bits.BYTES_LONG;
 import static com.hazelcast.internal.nio.Bits.BYTE_SIZE_IN_BYTES;
 import static com.hazelcast.internal.nio.Bits.CHAR_SIZE_IN_BYTES;
-import static com.hazelcast.internal.util.Preconditions.checkNotNull;
 import static com.hazelcast.internal.util.QuickMath.nextPowerOfTwo;
 
 
@@ -45,7 +45,8 @@ public class Frame {
 
     public static final int OFFSET_REQ_CALL_ID = OFFSET_PARTITION_ID + BYTES_INT;
     public static final int OFFSET_REQ_OPCODE = OFFSET_REQ_CALL_ID + BYTES_LONG;
-    public static final int OFFSET_REQ_PAYLOAD = OFFSET_REQ_OPCODE + BYTES_INT;
+    public static final int OFFSET_REQ_ACTOR_ID = OFFSET_REQ_OPCODE + BYTES_LONG + BYTES_LONG;
+    public static final int OFFSET_REQ_PAYLOAD = OFFSET_REQ_ACTOR_ID + BYTES_INT;
 
     public static final int OFFSET_RES_CALL_ID = OFFSET_PARTITION_ID + BYTES_INT;
     public static final int OFFSET_RES_PAYLOAD = OFFSET_RES_CALL_ID + BYTES_LONG;
@@ -54,6 +55,8 @@ public class Frame {
     private ByteBuffer buff;
     public FrameAllocator allocator;
     public boolean concurrent = false;
+
+    private UUID actorId;
 
     // make field?
     protected AtomicInteger refCount = new AtomicInteger();
@@ -90,6 +93,13 @@ public class Frame {
         buff.putInt(partitionId);
         buff.putLong(-1); //callid
         buff.putInt(opcode);
+        if (actorId == null) {
+            buff.putLong(0);
+            buff.putLong(0);
+        } else {
+            buff.putLong(actorId.getMostSignificantBits());
+            buff.putLong(actorId.getLeastSignificantBits());
+        }
         return this;
     }
 

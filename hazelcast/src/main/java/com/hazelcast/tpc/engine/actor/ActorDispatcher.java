@@ -1,18 +1,24 @@
 package com.hazelcast.tpc.engine.actor;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings({"unchecked", "SuspiciousMethodCalls", "rawtypes"})
+@SuppressWarnings("ALL")
 public class ActorDispatcher {
-    private static final Map<ActorAddress, Actor> actors = new ConcurrentHashMap<>();
+    private static final Map<ActorAddress, Actor> addressToActor = new ConcurrentHashMap<>();
+    private static final Map<UUID, Actor> idToActor = new ConcurrentHashMap<>();
 
-    public static Actor getActor(ActorAddress address) {
-        return actors.get(address);
+    public static ActorHandle getActor(ActorAddress address) {
+        return addressToActor.get(address).getHandle();
+    }
+
+    public static ActorHandle getActor(UUID uuid) {
+        return idToActor.get(uuid).getHandle();
     }
 
     public static boolean sendMessage(ActorAddress address, Message message) {
-        return actors.get(address).getMailbox().offer(message);
+        return addressToActor.get(address).getMailbox().offer(message);
     }
 
     public static void registerNewActor(Actor actor) {
@@ -26,6 +32,6 @@ public class ActorDispatcher {
 
     public static void registerNewActor(Actor actor, ActorAddress actorAddress) {
         registerNewActor(actor);
-        actors.put(actorAddress, actor);
+        addressToActor.put(actorAddress, actor);
     }
 }

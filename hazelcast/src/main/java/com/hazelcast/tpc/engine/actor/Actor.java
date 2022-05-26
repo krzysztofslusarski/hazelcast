@@ -3,6 +3,8 @@ package com.hazelcast.tpc.engine.actor;
 import com.hazelcast.tpc.engine.Eventloop;
 import com.hazelcast.tpc.engine.EventloopTask;
 
+import java.util.UUID;
+
 public abstract class Actor implements EventloopTask {
     public final static int DEFAULT_MAILBOX_CAPACITY = 512;
 
@@ -10,7 +12,7 @@ public abstract class Actor implements EventloopTask {
     protected Eventloop eventloop;
 
     private final LocalActorHandle handle = new LocalActorHandle(this);
-
+    private final UUID actorId = UUID.randomUUID();
     public LocalActorHandle getHandle() {
         return handle;
     }
@@ -60,4 +62,8 @@ public abstract class Actor implements EventloopTask {
     }
 
     public abstract void process(Message msg);
+
+    public UUID getActorId() {
+        return actorId;
+    }
 }

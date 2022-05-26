@@ -16,16 +16,22 @@ public class MapProjectionActor extends LoopLocalActor {
     @Override
     public void process(Message msg) {
         if (msg.getMessage() instanceof MapProjectionMessage) {
-            MapProjectionMessage message = (MapProjectionMessage) msg.getMessage();
-            returnMailbox = msg.getReturnMailbox();
-            MapGetMessage mapGetMessage = new MapGetMessage(message.getKey());
-            mapActorMailbox.offer(new Message(mapGetMessage, mailbox));
+            project((MapProjectionMessage) msg.getMessage(), msg.getReturnMailbox());
         } else if (msg.getMessage() instanceof MapGetResultMessage) {
-            MapGetResultMessage result = (MapGetResultMessage) msg.getMessage();
-            SomeDomainObject domainObject = (SomeDomainObject) result.getValue();
-            MapProjectionResultMessage resultMessage = new MapProjectionResultMessage(domainObject.getaString());
-            returnMailbox.offer(new Message(resultMessage, mailbox));
-            returnMailbox = null;
+            projectWithGetResult((MapGetResultMessage) msg.getMessage());
         }
+    }
+
+    private void project(MapProjectionMessage message, Mailbox returnMailbox) {
+        this.returnMailbox = returnMailbox;
+        MapGetMessage mapGetMessage = new MapGetMessage(message.getKey());
+        mapActorMailbox.offer(new Message(mapGetMessage, mailbox));
+    }
+
+    private void projectWithGetResult(MapGetResultMessage result) {
+        SomeDomainObject domainObject = (SomeDomainObject) result.getValue();
+        MapProjectionResultMessage resultMessage = new MapProjectionResultMessage(domainObject.getaString());
+        returnMailbox.offer(new Message(resultMessage, mailbox));
+        returnMailbox = null;
     }
 }
