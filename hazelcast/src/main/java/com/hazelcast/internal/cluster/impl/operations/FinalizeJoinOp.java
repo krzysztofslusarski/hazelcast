@@ -20,6 +20,7 @@ import com.hazelcast.cluster.Address;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.instance.impl.ClusterTopologyIntent;
 import com.hazelcast.instance.impl.Node;
+import com.hazelcast.internal.cluster.Versions;
 import com.hazelcast.internal.cluster.impl.ClusterDataSerializerHook;
 import com.hazelcast.internal.cluster.impl.ClusterServiceImpl;
 import com.hazelcast.internal.cluster.impl.MembersView;
@@ -41,7 +42,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.hazelcast.instance.impl.ClusterTopologyIntent.UNKNOWN;
 import static com.hazelcast.spi.impl.operationservice.OperationResponseHandlerFactory.createEmptyResponseHandler;
 
 /**
@@ -207,13 +207,16 @@ public class FinalizeJoinOp extends MembersUpdateOp implements TargetAware {
         clusterVersion = in.readObject();
         preJoinOp = readOnJoinOp(in);
         postJoinOp = readOnJoinOp(in);
+        if (deserializationFailure != null) {
+            // failure occurred while deserializing pre- or post-join ops
+            // stop deserializing now because outcome is undefined and run() will anyway fail
+            return;
+        }
         deferPartitionProcessing = in.readBoolean();
-        try {
+        // RU_COMPAT_5_1
+        if (this.clusterVersion.isGreaterOrEqual(Versions.V5_2)) {
             byte topologyIntentOrdinal = in.readByte();
             clusterTopologyIntent = ClusterTopologyIntent.values()[topologyIntentOrdinal];
-        } catch (IOException e) {
-            // ignore exception, input originates from version that does not include topology intent
-            clusterTopologyIntent = UNKNOWN;
         }
     }
 
