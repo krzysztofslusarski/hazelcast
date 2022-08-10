@@ -208,7 +208,6 @@ public class FinalizeJoinOp extends MembersUpdateOp implements TargetAware {
         preJoinOp = readOnJoinOp(in);
         postJoinOp = readOnJoinOp(in);
         deferPartitionProcessing = in.readBoolean();
-        // todo: test patch-level backwards compatibility
         try {
             byte topologyIntentOrdinal = in.readByte();
             clusterTopologyIntent = ClusterTopologyIntent.values()[topologyIntentOrdinal];
