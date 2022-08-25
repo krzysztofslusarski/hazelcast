@@ -41,6 +41,12 @@ public class IndexImpl extends AbstractIndex {
             String mapName
     ) {
         super(node, config, ss, extractors, copyBehavior, stats, mapName);
+        Object o = null;
+        try {
+            o.toString();
+        } catch (Exception e) {
+            node.getLogger(this.getClass()).warning("Index created", e);
+        }
 
         partitionTracker = new GlobalIndexPartitionTracker(partitionCount);
     }

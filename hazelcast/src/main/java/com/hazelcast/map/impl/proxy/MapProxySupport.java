@@ -93,9 +93,11 @@ import com.hazelcast.spi.impl.operationservice.OperationService;
 import com.hazelcast.spi.impl.operationservice.impl.InvocationFuture;
 import com.hazelcast.spi.properties.HazelcastProperties;
 import com.hazelcast.spi.properties.HazelcastProperty;
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -110,6 +112,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -1341,6 +1344,8 @@ abstract class MapProxySupport<K, V>
         addIndexInternal(indexConfig, false);
     }
 
+    private static final AtomicBoolean wasDone = new AtomicBoolean();
+
     private void addIndexInternal(IndexConfig indexConfig, boolean localOnly) {
         checkNotNull(indexConfig, "Index config cannot be null.");
         checkFalse(isNativeMemoryAndBitmapIndexingEnabled(indexConfig.getType()),
@@ -1353,9 +1358,22 @@ abstract class MapProxySupport<K, V>
             if (localOnly) {
                 List<Integer> ownedPartitions = getNodeEngine().getPartitionService()
                         .getMemberPartitions(getNodeEngine().getThisAddress());
+                getNodeEngine().getLogger(this.getClass()).warning("Creation of indices will happen on partition count: "
+                        + ownedPartitions.size());
+                if (ownedPartitions.size() == 0 && wasDone.compareAndSet(false, true)) {
+                    try {
+                        HotSpotDiagnosticMXBean mxBean = ManagementFactory
+                                .newPlatformMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
+                                        "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+                        mxBean.dumpHeap("/tmp/emptyPartitions.hprof", false);
+                    } catch (Exception e) {
+                        getNodeEngine().getLogger(this.getClass()).warning("Cannot get heap dump", e);
+                    }
+                }
                 operationService.invokeOnPartitions(SERVICE_NAME,
                         new BinaryOperationFactory(addIndexOperation, getNodeEngine()), ownedPartitions);
             } else {
+                getNodeEngine().getLogger(this.getClass()).warning("Creation of indices will happen on all partitions");
                 operationService.invokeOnAllPartitions(SERVICE_NAME,
                         new BinaryOperationFactory(addIndexOperation, getNodeEngine()));
             }
